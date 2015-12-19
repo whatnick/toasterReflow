@@ -12,19 +12,22 @@ from profiles import *
 from PID import *
 
 from bbio import *
-#from MAX31855 import *
-from fs9721 import Client
+import Adafruit_BBIO.GPIO as GPIO
+from bbio.libraries.MAX31855 import MAX31855
+#from fs9721 import Client
 
 class Oven(object):
-  def __init__(self, heater_pin, temp_cs, temp_clk, temp_data,  fan_pin=None):
+  def __init__(self, heater_pin, temp_cs,  fan_pin=None):
     self.heater_pin = heater_pin
     self.fan_pin= fan_pin
-    #self.thermocouple = MAX31855(temp_data, temp_clk, temp_cs, TEMP_OFFSET)
-    self.thermocouple = Client('/dev/ttyUSB0')
+    self.thermocouple = MAX31855(SPI1,temp_cs)
+    #self.thermocouple = Client('/dev/ttyUSB0')
     self.pid = PID(PID_KP, PID_KI, PID_KD)
 
-    pinMode(heater_pin, OUTPUT)
-    if (fan_pin): pinMode(fan_pin, OUTPUT)
+    #pinMode(heater_pin, OUTPUT)
+    GPIO.setup(heater_pin, GPIO.OUT)
+    #if (fan_pin): pinMode(fan_pin, OUTPUT)
+    if (fan_pin): GPIO.setup(fan_pin, GPIO.OUT)
     else: self.fan_state = "disabled"
     self.heatOff()
     self.fanOff()
@@ -78,7 +81,7 @@ class Oven(object):
         temp = self.getTemp()
         if (temp == None):
           self.stop()
-          self.error = self.thermocoule.error
+          self.error = self.thermocouple.error
           print self.error
           return
         # Record current temp:
@@ -108,28 +111,33 @@ class Oven(object):
     self.fanOff()
 
   def heatOn(self):
-    digitalWrite(self.heater_pin, HEATER_ON)
+    #digitalWrite(self.heater_pin, HEATER_ON)
+    GPIO.output(self.heater_pin, GPIO.HIGH)
     self.heat_state = "on"
 
   def heatOff(self):
-    digitalWrite(self.heater_pin, HEATER_ON^1)
+    #digitalWrite(self.heater_pin, HEATER_ON^1)
+    GPIO.output(self.heater_pin, GPIO.LOW)
     self.heat_state = "off"
 
   def fanOn(self):
     if (self.fan_pin): 
-      digitalWrite(self.fan_pin, FAN_ON)
+      #digitalWrite(self.fan_pin, FAN_ON)
+      GPIO.output(self.fan_pin, GPIO.HIGH)
       self.fan_state = "on"
 
   def fanOff(self):
     if (self.fan_pin):
-      digitalWrite(self.fan_pin, FAN_ON^1)
+      #digitalWrite(self.fan_pin, FAN_ON^1)
+      GPIO.output(self.fan_pin, GPIO.LOW)
       self.fan_state = "off"
 
   def getTemp(self):
     for i in range(10):
       # readTempC() return None if error; try a few times to make
       # sure error isn't just a hiccup before aborting current reflow.
-      temp = self.thermocouple.getMeasurement().value
+      SPI1.open()
+      temp = self.thermocouple.readTempC()
       if temp:
         if (temp > 100): print '\n%s\n' % temp
         return temp

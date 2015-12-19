@@ -15,23 +15,29 @@ from functools import wraps
 
 from toasterReflow import *
 from bbio import *
+from bbio.libraries.MAX31855 import MAX31855
 
 # Set variables for the pins connected to the ADC:
-data_pin = GPIO1_15  # P8.15
-clk_pin  = GPIO1_14  # P8.16
-cs_pin   = GPIO0_27  # P8.17
+#PyBBIO now uses hardware SPI for MAX31855
+#data_pin = GPIO1_15  # P8.15
+#clk_pin  = GPIO1_14  # P8.16
+#cs_pin   = GPIO0_27  # P8.17
 
-heater_pin = GPIO2_1   # P8.18
-fan_pin    = GPIO1_31  # P8.20
+heater_pin = "GPIO0_26"  # P8.18
+#fan_pin    = GPIO1_31  # P8.20
 
 
-data_pin = GPIO2_6
-clk_pin  = GPIO2_10
-cs_pin   = GPIO2_8
+#data_pin = GPIO2_6
+#clk_pin  = GPIO2_10
+#cs_pin   = GPIO2_8
 
-fan_pin    = GPIO1_19
+fan_pin    = "GPIO1_14"
+SPI1.open()
+thermo = MAX31855(SPI1,0)
+print thermo.readTempC()
+delay(100)
 
-reflow_oven = Oven(heater_pin, cs_pin, clk_pin, data_pin,  fan_pin)
+reflow_oven = Oven(heater_pin, 0, fan_pin)
 
 app = Flask(__name__)
 app.config.from_pyfile('toasterReflow.cfg')
@@ -216,7 +222,7 @@ def stopReflow():
 
 if __name__ == "__main__":
   app.debug=True
-  app.run(host='0.0.0.0')
+  app.run(host='0.0.0.0',port=8000)
 
   # Make sure the oven is off once the server is stopped:
   reflow_oven.abort = True
