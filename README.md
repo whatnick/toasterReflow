@@ -8,6 +8,9 @@ support more platforms. It uses a [Flask](http://flask.pocoo.org/)
 based web interface, with realtime temperature data plotted using 
 [Flot](http://www.flotcharts.org/).
 
+BeagleBone based reflow oven write up including enhancements such as multiple heating elements,
+self calibration of duty cycles and buzzer can be found on [Seeedstudio Recipe](http://www.seeedstudio.com/recipe/1096-beagleflow-beaglebone-green-reflow-oven.html)
+
 Not everything is working quite right yet, and anything is bound to change;
 use at your own risk!
 
