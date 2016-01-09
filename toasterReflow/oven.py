@@ -15,11 +15,14 @@ from bbio import *
 import Adafruit_BBIO.GPIO as GPIO
 from bbio.libraries.MAX31855 import MAX31855
 #from fs9721 import Client
+from oled import *
 
 class Oven(object):
-  def __init__(self, heater_pin, temp_cs,  fan_pin=None):
+  def __init__(self, heater_pin, temp_cs, top_pin=None,booster_pin=None, fan_pin = None):
     self.heater_pin = heater_pin
     self.fan_pin= fan_pin
+    self.top_pin = top_pin
+    self.booster_pin = booster_pin
     self.thermocouple = MAX31855(SPI1,temp_cs)
     #self.thermocouple = Client('/dev/ttyUSB0')
     self.pid = PID(PID_KP, PID_KI, PID_KD)

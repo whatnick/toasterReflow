@@ -2,7 +2,7 @@ from Adafruit_I2C import Adafruit_I2C
 import time
 import math
  
- 
+
 Oled = Adafruit_I2C(0x3c)
 Command_Mode=0x80
 Data_mode=0x40
@@ -215,7 +215,7 @@ def oled_putString(String):
     for i in range(len(String)):
         oled_putChar(String[i])   
  
- 
+""" 
 if __name__=="__main__":
     oled_init()
     oled_clearDisplay()
@@ -230,3 +230,4 @@ if __name__=="__main__":
     #Oled.write8(Command_Mode,0xFD)
     #sendCommand(0xFD)
     print 'hello world'
+"""

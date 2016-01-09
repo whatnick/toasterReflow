@@ -23,7 +23,9 @@ from bbio.libraries.MAX31855 import MAX31855
 #clk_pin  = GPIO1_14  # P8.16
 #cs_pin   = GPIO0_27  # P8.17
 
-heater_pin = "GPIO0_26"  # P8.18
+heater2_pin = "GPIO2_25"  # P8.18
+heater3_pin = "GPIO2_24"
+heater_pin = "GPIO2_23"
 #fan_pin    = GPIO1_31  # P8.20
 
 
@@ -31,19 +33,28 @@ heater_pin = "GPIO0_26"  # P8.18
 #clk_pin  = GPIO2_10
 #cs_pin   = GPIO2_8
 
-fan_pin    = "GPIO1_14"
+fan_pin    = "GPIO2_22"
 SPI1.open()
 thermo = MAX31855(SPI1,0)
 print thermo.readTempC()
 delay(100)
 
-reflow_oven = Oven(heater_pin, 0, fan_pin)
+reflow_oven = Oven(heater_pin, 0, fan_pin ,heater2_pin, heater3_pin)
+rs_buzz = buzzer("P8_12")
+#Do a test buzz
+rs_buzz.buzz(1000,0.5)
 
 app = Flask(__name__)
 app.config.from_pyfile('toasterReflow.cfg')
 
 app.config['NAVIGATION'] = [['Oven Control', '/'],
                             ['Profile Editor', '/profile-editor']]
+
+
+#Initialise OLED
+oled_init()
+oled_clearDisplay()
+oled_setNormalDisplay()
 
 # Global variable to store the currently selected profile; used when
 # starting reflow:
@@ -128,6 +139,8 @@ def getPhases():
 @requireLogin
 def getCurrentPhase():
   """ Returns the current reflow phases. """
+  oled_setTextXY(3,0)
+  oled_putString(reflow_oven.current_phase+"     ")
   return json.dumps(reflow_oven.current_phase)
 
 @app.route('/current-step', methods=['GET'])
@@ -169,6 +182,8 @@ def temperature():
   temp = reflow_oven.getTemp()
   if (temp == None): 
     return json.dumps(reflow_oven.thermocouple.error)
+  oled_setTextXY(2,0)
+  oled_putString("Temp:"+str(temp))
   return json.dumps(temp)
 
 @app.route('/control/heater', methods=['GET', 'POST'])
